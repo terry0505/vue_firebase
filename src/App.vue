@@ -3,7 +3,9 @@
     <header>
       <nav>
         <RouterLink to="/">홈</RouterLink> |
-        <RouterLink to="/login">로그인</RouterLink>
+        <RouterLink v-if="!user" to="/login">로그인</RouterLink> |
+        <span v-if="user">{{ user.email }} 님</span>
+        <button v-if="user" @click="logout">로그아웃</button>
       </nav>
     </header>
 
@@ -14,8 +16,20 @@
 </template>
 
 <script>
+import { useUserStore } from "./store/user";
+import { storeToRefs } from "pinia";
+
 export default {
-  name: "App"
+  setup() {
+    const userStore = useUserStore();
+    const { user } = storeToRefs(userStore);
+
+    const logout = () => {
+      userStore.logout();
+    };
+
+    return { user, logout };
+  }
 };
 </script>
 
