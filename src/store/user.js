@@ -9,8 +9,13 @@ export const useUserStore = defineStore("user", () => {
   // 로그인 상태 변경 감지
   const initAuth = () => {
     onAuthStateChanged(auth, (firebaseUser) => {
-      user.value = firebaseUser;
-      console.log("📡 사용자 상태 변경:", firebaseUser);
+      if (firebaseUser) {
+        console.log(
+          "🔐 로그인됨:",
+          firebaseUser?.displayName,
+          firebaseUser?.email
+        );
+      }
     });
   };
 
