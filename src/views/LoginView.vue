@@ -108,7 +108,6 @@ export default {
   gap: 16px;
 
   input {
-    margin: 0 0 10px;
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -116,7 +115,6 @@ export default {
   }
 
   .buttons {
-    margin: 10px auto 0;
     display: flex;
     justify-content: space-between;
 
@@ -145,14 +143,8 @@ export default {
       padding: 10px;
       margin-bottom: 10px;
       font-size: 15px;
-      background-color: #f5f5f5;
       border: 1px solid #ccc;
-      color: #111;
       cursor: pointer;
-
-      &:hover {
-        background-color: #eaeaea;
-      }
     }
   }
 
