@@ -16,6 +16,7 @@
         <button v-if="user?.uid === post.userId" @click="removePost(post.id)">
           삭제
         </button>
+        <CommentBox :postId="post.id" />
       </li>
     </ul>
   </div>
@@ -26,8 +27,10 @@ import { ref, onMounted } from "vue";
 import { useUserStore } from "../store/user";
 import { createPost, getAllPosts, deletePost } from "@/libs/PostService";
 import { storeToRefs } from "pinia";
+import CommentBox from "../components/CommentBox.vue";
 
 export default {
+  components: { CommentBox },
   setup() {
     const posts = ref([]);
     const newPost = ref("");
