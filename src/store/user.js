@@ -5,16 +5,15 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 
 export const useUserStore = defineStore("user", () => {
   const user = ref(null);
+  const isReady = ref(false);
 
   // 로그인 상태 변경 감지
   const initAuth = () => {
-    onAuthStateChanged(auth, (firebaseUser) => {
-      user.value = firebaseUser;
-      console.log(
-        "🔐 로그인됨:",
-        firebaseUser?.displayName,
-        firebaseUser?.email
-      );
+    new Promise((resolve) => {
+      onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser;
+        isReady.value = true;
+      });
     });
   };
 
@@ -25,6 +24,7 @@ export const useUserStore = defineStore("user", () => {
 
   return {
     user,
+    isReady,
     initAuth,
     logout
   };
