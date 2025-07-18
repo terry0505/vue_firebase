@@ -7,7 +7,8 @@ import {
   orderBy,
   query,
   deleteDoc,
-  doc
+  doc,
+  updateDoc 
 } from "firebase/firestore";
 
 const postsRef = collection(db, "posts");
@@ -34,3 +35,8 @@ export async function getAllPosts() {
 export async function deletePost(id) {
   return await deleteDoc(doc(postsRef, id));
 }
+
+export const updatePost = async (id, content) => {
+  const postRef = doc(db, 'posts', id);
+  await updateDoc(postRef, { content });
+};

@@ -29,7 +29,19 @@
           />
         </div>
 
-        <p class="content">{{ post.content }}</p>
+        <!-- 게시글 내용 -->
+        <div v-if="editingPostId === post.id">
+          <textarea v-model="editedContent" rows="4" class="edit-input" />
+          <button @click="saveEdit(post.id)">저장</button>
+          <button @click="cancelEdit">취소</button>
+        </div>
+        <p v-else class="content">{{ post.content }}</p>
+
+        <!-- 수정 & 삭제 버튼 -->
+        <div class="actions" v-if="user?.uid === post.userId">
+          <button @click="startEdit(post)">수정</button>
+          <button @click="removePost(post.id)">삭제</button>
+        </div>
 
         <div class="actions" v-if="user?.uid === post.userId">
           <button @click="removePost(post.id)">삭제</button>
@@ -45,14 +57,20 @@
 import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useUserStore } from "../store/user";
-import { createPost, getAllPosts, deletePost } from "@/libs/PostService";
+import {
+  createPost,
+  getAllPosts,
+  deletePost,
+  updatePost
+} from "@/libs/PostService";
 import CommentBox from "../components/CommentBox.vue";
 
 export default {
   components: { CommentBox },
   setup() {
     const posts = ref([]);
-    const newPost = ref("");
+    const editingPostId = ref(null);
+    const editedContent = ref("");
     const userStore = useUserStore();
     const { user } = storeToRefs(userStore);
 
@@ -60,15 +78,25 @@ export default {
       posts.value = await getAllPosts();
     };
 
-    const addPost = async () => {
-      if (!user.value || !newPost.value.trim()) return;
-      await createPost(user.value, newPost.value);
-      newPost.value = "";
+    const removePost = async (id) => {
+      await deletePost(id, user.value);
       await fetchPosts();
     };
 
-    const removePost = async (id) => {
-      await deletePost(id);
+    const startEdit = (post) => {
+      editingPostId.value = post.id;
+      editedContent.value = post.content;
+    };
+
+    const cancelEdit = () => {
+      editingPostId.value = null;
+      editedContent.value = "";
+    };
+
+    const saveEdit = async (id) => {
+      if (!editedContent.value.trim()) return;
+      await updatePost(id, editedContent.value);
+      editingPostId.value = null;
       await fetchPosts();
     };
 
@@ -80,7 +108,17 @@ export default {
 
     onMounted(fetchPosts);
 
-    return { posts, newPost, addPost, removePost, user, formatDate };
+    return {
+      posts,
+      removePost,
+      user,
+      formatDate,
+      editingPostId,
+      editedContent,
+      startEdit,
+      cancelEdit,
+      saveEdit
+    };
   }
 };
 </script>
@@ -152,7 +190,14 @@ export default {
         margin: 10px 0;
         white-space: pre-wrap;
       }
-
+      .edit-input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
       .actions {
         text-align: right;
         margin-bottom: 8px;
