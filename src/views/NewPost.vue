@@ -8,9 +8,18 @@
         rows="6"
         required
       ></textarea>
-      <input type="file" @change="handleFileChange" accept="image/*" />
+      <input type="file" multiple @change="handleFileChange" accept="image/*" />
 
-      <img v-if="previewUrl" :src="previewUrl" class="preview" />
+      <div class="preview">
+        <div
+          v-for="(img, index) in previewUrls"
+          :key="index"
+          class="preview-img"
+        >
+          <img :src="img" />
+          <button type="button" @click="removeImage(index)">삭제</button>
+        </div>
+      </div>
 
       <button type="submit">등록하기</button>
     </form>
@@ -27,32 +36,45 @@ import { useRouter } from "vue-router";
 export default {
   setup() {
     const content = ref("");
-    const imageFile = ref(null);
-    const previewUrl = ref("");
+    const imageFiles = ref([]);
+    const previewUrls = ref([]);
     const userStore = useUserStore();
     const router = useRouter();
 
     const handleFileChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        imageFile.value = file;
-        previewUrl.value = URL.createObjectURL(file);
+      const files = Array.from(e.target.files);
+      for (const file of files) {
+        imageFiles.value.push(file);
+        previewUrls.value.push(URL.createObjectURL(file));
       }
+    };
+
+    const removeImage = (index) => {
+      imageFiles.value.splice(index, 1);
+      previewUrls.value.splice(index, 1);
     };
 
     const submit = async () => {
       if (!content.value.trim()) return;
 
-      let imageUrl = "";
-      if (imageFile.value) {
-        imageUrl = await uploadImage(imageFile.value);
+      const imageUrls = [];
+      for (const file of imageFiles.value) {
+        const url = await uploadImage(file);
+        imageUrls.push(url);
       }
 
-      await createPost(userStore.user, content.value, imageUrl);
+      await createPost(userStore.user, content.value, imageUrls);
       router.push("/posts");
     };
 
-    return { content, submit, handleFileChange, previewUrl };
+    return {
+      content,
+      previewUrls,
+      imageFiles,
+      submit,
+      handleFileChange,
+      removeImage
+    };
   }
 };
 </script>
@@ -100,10 +122,39 @@ export default {
     }
   }
 }
+
 .preview {
-  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 12px;
-  border-radius: 8px;
-  object-fit: cover;
+
+  .preview-img {
+    position: relative;
+
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    button {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      padding: 5px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  }
 }
 </style>

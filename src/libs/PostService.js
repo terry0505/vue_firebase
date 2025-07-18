@@ -12,20 +12,23 @@ import {
 
 const postsRef = collection(db, "posts");
 
-export const createPost = async (user, content, imageUrl = "") => {
+export const createPost = async (user, content, images = []) => {
   await addDoc(collection(db, "posts"), {
     userId: user.uid,
     email: user.email,
     content,
-    imageUrl,
+    images,
     createdAt: serverTimestamp()
   });
 };
 
 export async function getAllPosts() {
-  const q = query(postsRef, orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const snapshot = await getDocs(collection(db, "posts"));
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    images: doc.data().images || [] // ✅ 기본값 처리
+  }));
 }
 
 export async function deletePost(id) {

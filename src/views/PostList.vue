@@ -19,7 +19,15 @@
           <small>{{ formatDate(post.createdAt) }}</small>
         </div>
 
-        <img v-if="post.imageUrl" :src="post.imageUrl" class="post-image" />
+        <div class="image-gallery" v-if="post.images && post.images.length">
+          <img
+            v-for="(img, i) in post.images"
+            :key="i"
+            :src="img"
+            class="post-image"
+            alt="게시글 이미지"
+          />
+        </div>
 
         <p class="content">{{ post.content }}</p>
 
@@ -162,12 +170,18 @@ export default {
           }
         }
       }
+      .image-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
 
-      .post-image {
-        width: 100%;
-        border-radius: 6px;
-        margin: 10px 0;
-        object-fit: cover;
+        img.post-image {
+          width: 100%;
+          max-width: 150px;
+          height: auto;
+          border-radius: 6px;
+          object-fit: cover;
+        }
       }
     }
   }
